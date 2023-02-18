@@ -70,6 +70,8 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init2
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1destroy
   (JNIEnv* env, jobject thisObj) {
+	// release
+	ret = rknn_destroy(ctx);
 	return ret;
 }
 
@@ -160,6 +162,8 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
   (JNIEnv* env, jobject thisObj, jobject extend) {
+	/* we will have to extract the extend structure and use it at some point */
+	ret = rknn_run(ctx, NULL);
 	return ret;
 }
 
