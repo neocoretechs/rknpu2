@@ -1,0 +1,7 @@
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/./rknn_create_mem_demo
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/./rknn_create_mem_with_rga_demo
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/.//model/dog_224x224.jpg
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/.//model/RK356X/mobilenet_v1.rknn
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/.//model/RK3588/mobilenet_v1.rknn
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/lib/librknnrt.so
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/install/rknn_api_demo_Linux/lib/librga.so

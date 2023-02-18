@@ -1,0 +1,1 @@
+/usr/bin/aarch64-linux-gnu-g++  -Wl,--allow-shlib-undefined CMakeFiles/rknn_create_mem_demo.dir/src/rknn_create_mem_demo.cpp.o -o rknn_create_mem_demo  -Wl,-rpath,/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_api_demo/../../runtime/RK3588/Linux/librknn_api/aarch64: ../../../../runtime/RK3588/Linux/librknn_api/aarch64/librknnrt.so 

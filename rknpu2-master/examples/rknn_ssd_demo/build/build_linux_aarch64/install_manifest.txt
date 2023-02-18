@@ -1,0 +1,7 @@
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/./rknn_ssd_demo
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/.//model/bus.jpg
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/.//model/coco_labels_list.txt
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/.//model/RK356X/ssd_inception_v2.rknn
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/.//model/RK3588/ssd_inception_v2.rknn
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/.//model/box_priors.txt
+/home/jg/npu/rknpu2-master/rknpu2-master/examples/rknn_ssd_demo/install/rknn_ssd_demo_Linux/lib/librknnrt.so

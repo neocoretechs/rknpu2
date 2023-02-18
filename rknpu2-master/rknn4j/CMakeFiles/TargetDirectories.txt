@@ -1,0 +1,7 @@
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/rknn4j.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/edit_cache.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/rebuild_cache.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/list_install_components.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/install.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/install/local.dir
+/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/CMakeFiles/install/strip.dir
