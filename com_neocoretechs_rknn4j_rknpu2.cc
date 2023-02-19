@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <dlfcn.h>
 
 #include "rknn_api.h"
 
@@ -14,6 +15,12 @@
 
   rknn_context   ctx;
   int            ret;
+  void *handle;
+  int (*nn_init)(rknn_context*, void*, uint32_t, uint32_t, rknn_init_extend*);
+  int (*nn_query)(rknn_context, rknn_query_cmd, void*, uint32_t);
+  int (*nn_run)(rknn_context, rknn_run_extend*);
+  int (*nn_destroy)(rknn_context);
+  char *error;
 
   jbyteArray as_byte_array(JNIEnv* env, unsigned char* buf, int len) {
       jbyteArray array = env->NewByteArray(len);
@@ -44,11 +51,30 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
 	 data = as_unsigned_char_array(env, model, size);
 	 if(data == NULL)
 	    return RKNN_ERR_MALLOC_FAIL;
-	  ret = rknn_init(&ctx, data, size, flag, NULL);
+	  //ret = rknn_init(&ctx, data, size, flag, NULL);
+	 printf("handle\n");
+	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	  }
+	  printf("init %p\n",handle);
+	  dlerror();
+	  nn_init =(int (*)(rknn_context*, void*, uint32_t, uint32_t, rknn_init_extend*)) dlsym(handle, "rknn_init");
+	  printf("function pointer init %p\n",nn_init);
+	  //error = dlerror();
+	  //if (error!= NULL)  {
+		//	  printf("dlerr=%s\n",error);
+		//	  return RKNN_ERR_FAIL;
+	  //}
+	  dlerror();
+	  printf("Preparing lookup\n");
+	  ret = (*nn_init)(&ctx, data, size, flag, NULL);
+	  dlclose(handle);
 	  if (ret < RKNN_SUCC) {
 	    printf("rknn_init error ret=%d\n", ret);
 	  } else {
-		  printf("rknn_init success!=%d\n", ret);
+		  printf("rknn_init success=%d ctx=%ld\n", ret,ctx);
 	  }
 	  return ret;
 }
@@ -71,7 +97,22 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init2
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1destroy
   (JNIEnv* env, jobject thisObj) {
 	// release
-	ret = rknn_destroy(ctx);
+	//ret = rknn_destroy(ctx);
+	 printf("destroy handle\n");
+	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	  }
+	  printf("destory init %p\n",handle);
+	  dlerror();
+	  nn_destroy =(int (*)(rknn_context)) dlsym(handle, "rknn_destroy");
+	  printf("function pointer run %p\n",nn_destroy);
+	  dlerror();
+	  printf("Preparing destroy lookup\n");
+	  ret = (*nn_destroy)(ctx);
+	  printf("destroy lookup success\n");
+	  dlclose(handle);
 	return ret;
 }
 
@@ -85,7 +126,27 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
 	jstring jstrBuf;
 	rknn_sdk_version output_attrs;
 	memset(&output_attrs, 0, sizeof(output_attrs));
-	ret = rknn_query(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
+	//ret = rknn_query(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
+	 printf("query handle\n");
+	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	  }
+	  printf("query init %p\n",handle);
+	  dlerror();
+	  nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	  printf("function pointer query %p\n",nn_query);
+	  //error = dlerror();
+	  //if (error!= NULL)  {
+		//	  printf("dlerr=%s\n",error);
+		//	  return RKNN_ERR_FAIL;
+	  //}
+	  dlerror();
+	  printf("Preparing query lookup\n");
+	  ret = (*nn_query)(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
+	  printf("query lookup success\n");
+	  dlclose(handle);
 	if(ret >= RKNN_SUCC) {
 		printf("sdk version acquired: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
 		jclass userDataClass=env->GetObjectClass(info);
@@ -110,7 +171,27 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1IO_1num
   (JNIEnv* env, jobject thisObj, jobject info) {
 	rknn_input_output_num io_num;
-	ret = rknn_query(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
+	//ret = rknn_query(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
+	 printf("query handle\n");
+	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	  }
+	  printf("query init %p\n",handle);
+	  dlerror();
+	  nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	  printf("function pointer query %p\n",nn_query);
+	  //error = dlerror();
+	  //if (error!= NULL)  {
+		//	  printf("dlerr=%s\n",error);
+		//	  return RKNN_ERR_FAIL;
+	  //}
+	  dlerror();
+	  printf("Preparing query lookup\n");
+	  ret = (*nn_query)(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
+	  printf("query lookup success\n");
+	  dlclose(handle);
 	if (ret >= RKNN_SUCC) {
 		printf("model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
 		jclass userDataClass=env->GetObjectClass(info);
@@ -163,7 +244,22 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
   (JNIEnv* env, jobject thisObj, jobject extend) {
 	/* we will have to extract the extend structure and use it at some point */
-	ret = rknn_run(ctx, NULL);
+	//ret = rknn_run(ctx, NULL);
+	 printf("run handle\n");
+	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	  }
+	  printf("run init %p\n",handle);
+	  dlerror();
+	  nn_run =(int (*)(rknn_context, rknn_run_extend*)) dlsym(handle, "rknn_run");
+	  printf("function pointer run %p\n",nn_run);
+	  dlerror();
+	  printf("Preparing run lookup\n");
+	  ret = (*nn_run)(ctx, NULL);
+	  printf("run lookup success\n");
+	  dlclose(handle);
 	return ret;
 }
 
