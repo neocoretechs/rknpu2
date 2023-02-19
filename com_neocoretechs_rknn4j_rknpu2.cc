@@ -150,11 +150,17 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
 	if(ret >= RKNN_SUCC) {
 		printf("sdk version acquired: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
 		jclass userDataClass=env->GetObjectClass(info);
-		jmethodID methodId=env->GetMethodID(userDataClass, "setApi_Version", "(Ljava/lang/String;)V");
+		printf("object class success\n");
+		jmethodID methodId=env->GetMethodID(userDataClass, "setApi_version", "(Ljava/lang/String;)V");
+		printf("method id success\n");
 		jmethodID methodId2=env->GetMethodID( userDataClass, "setDrv_version", "(Ljava/lang/String;)V");
+		printf("method id success2\n");
 		jstrBuf = env->NewStringUTF(output_attrs.api_version);
+		printf("string buf success\n");
 		env->CallObjectMethod(info, methodId, jstrBuf);
+		printf("object method call success\n");
 		jstrBuf = env->NewStringUTF(output_attrs.drv_version);
+		printf("string buf2 success\n");
 		env->CallObjectMethod(info, methodId2, jstrBuf);
 		printf("jdk values set: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
 	} else {
