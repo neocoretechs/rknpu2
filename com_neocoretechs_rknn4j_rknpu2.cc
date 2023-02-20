@@ -12,7 +12,12 @@
 #define __com_neocoretechs_rknn4j_rknpu2
 #include "com_neocoretechs_rknn4j_rknpu2.h"
 #endif
-
+/*
+ * JNI bindings to RKNN NPU API. Accessor and mutator methods favored to transfer
+ * values to corresponding Java classes over direct field settings.
+ * use: javap -s <javaVersionOfTypedef.class>
+ * to see the accessor and mutator method signatures to use in env->GetMethodId(class, method, signature)
+ */
   rknn_context   ctx;
   int            ret;
   void *handle;
@@ -35,11 +40,18 @@
   	data = (unsigned char*)malloc(len);
   	if(data == NULL)
   	    return NULL;
-      env->GetByteArrayRegion(array, 0, len, (jbyte*)(data));
-      return data;
+    env->GetByteArrayRegion(array, 0, len, (jbyte*)(data));
+    return data;
   }
 
-
+  static void dump_tensor_attr(rknn_tensor_attr* attr) {
+    printf("  index=%d, name=%s, n_dims=%d, dims=[%d, %d, %d, %d], n_elems=%d, size=%d, fmt=%s, type=%s, qnt_type=%s, "
+           "zp=%d, scale=%f, fl=%d, w_stride=%d, size_with_stride=%d, pass_through=%d, h_stride=%d\n",
+           attr->index, attr->name, attr->n_dims, attr->dims[0], attr->dims[1], attr->dims[2], attr->dims[3],
+           attr->n_elems, attr->size, get_format_string(attr->fmt), get_type_string(attr->type),
+           get_qnt_type_string(attr->qnt_type), attr->zp, attr->scale, attr->fl, attr->w_stride,
+		   attr->size_with_stride, attr->pass_through, attr->h_stride);
+  }
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_init
@@ -47,46 +59,40 @@
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
   (JNIEnv* env, jobject thisObj, jbyteArray model, jint size, jint flag) {
-	 unsigned char* data;
-	 data = as_unsigned_char_array(env, model, size);
-	 if(data == NULL)
+	unsigned char* data;
+	data = as_unsigned_char_array(env, model, size);
+	if(data == NULL)
 	    return RKNN_ERR_MALLOC_FAIL;
-	  //ret = rknn_init(&ctx, data, size, flag, NULL);
-	 printf("handle\n");
-	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
-	  if (!handle) {
+	//ret = rknn_init(&ctx, data, size, flag, NULL);
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
-	  }
-	  printf("init %p\n",handle);
-	  dlerror();
-	  nn_init =(int (*)(rknn_context*, void*, uint32_t, uint32_t, rknn_init_extend*)) dlsym(handle, "rknn_init");
-	  printf("function pointer init %p\n",nn_init);
-	  //error = dlerror();
-	  //if (error!= NULL)  {
-		//	  printf("dlerr=%s\n",error);
-		//	  return RKNN_ERR_FAIL;
-	  //}
-	  dlerror();
-	  printf("Preparing lookup\n");
-	  ret = (*nn_init)(&ctx, data, size, flag, NULL);
-	  dlclose(handle);
-	  if (ret < RKNN_SUCC) {
+	}
+	dlerror();
+	nn_init =(int (*)(rknn_context*, void*, uint32_t, uint32_t, rknn_init_extend*)) dlsym(handle, "rknn_init");
+	dlerror();
+	ret = (*nn_init)(&ctx, data, size, flag, NULL);
+	dlclose(handle);
+	if (ret < RKNN_SUCC) {
 	    printf("rknn_init error ret=%d\n", ret);
-	  } else {
+	} else {
 		  printf("rknn_init success=%d ctx=%ld\n", ret,ctx);
-	  }
+	}
 	  return ret;
 }
 
 /*
+ * API v1.4.0 guide says rknn_init_extend: The extended information during specific initialization.
+ * It is disabled at the moment, which indicates this must be passed by the NULL. If using share weight， it
+ * should pass the pointer of another rknn_context pointing to another
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_init2
  * Signature: ([BIILcom/neocoretechs/rknn4j/rknn_init_extend;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init2
   (JNIEnv* env, jobject thisObj, jbyteArray model, jint size, jint flag, jobject extend) {
-	return ret;
+	return RKNN_ERR_FAIL;
 }
 
 /*
@@ -98,21 +104,16 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1destroy
   (JNIEnv* env, jobject thisObj) {
 	// release
 	//ret = rknn_destroy(ctx);
-	 printf("destroy handle\n");
-	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
-	  if (!handle) {
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
-	  }
-	  printf("destory init %p\n",handle);
-	  dlerror();
-	  nn_destroy =(int (*)(rknn_context)) dlsym(handle, "rknn_destroy");
-	  printf("function pointer run %p\n",nn_destroy);
-	  dlerror();
-	  printf("Preparing destroy lookup\n");
-	  ret = (*nn_destroy)(ctx);
-	  printf("destroy lookup success\n");
-	  dlclose(handle);
+	}
+	dlerror();
+	nn_destroy =(int (*)(rknn_context)) dlsym(handle, "rknn_destroy");
+	dlerror();
+	ret = (*nn_destroy)(ctx);
+	dlclose(handle);
 	return ret;
 }
 
@@ -127,42 +128,28 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
 	rknn_sdk_version output_attrs;
 	memset(&output_attrs, 0, sizeof(output_attrs));
 	//ret = rknn_query(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
-	 printf("query handle\n");
-	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
-	  if (!handle) {
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
-	  }
-	  printf("query init %p\n",handle);
-	  dlerror();
-	  nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
-	  printf("function pointer query %p\n",nn_query);
-	  //error = dlerror();
-	  //if (error!= NULL)  {
-		//	  printf("dlerr=%s\n",error);
-		//	  return RKNN_ERR_FAIL;
-	  //}
-	  dlerror();
-	  printf("Preparing query lookup\n");
-	  ret = (*nn_query)(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
-	  printf("query lookup success\n");
-	  dlclose(handle);
+	}
+	//printf("query init %p\n",handle);
+	dlerror();
+	nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	//printf("function pointer query %p\n",nn_query);
+	dlerror();
+	ret = (*nn_query)(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
+	dlclose(handle);
 	if(ret >= RKNN_SUCC) {
-		printf("sdk version acquired: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
+		//printf("sdk version acquired: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
 		jclass userDataClass=env->GetObjectClass(info);
-		printf("object class success\n");
 		jmethodID methodId=env->GetMethodID(userDataClass, "setApi_version", "(Ljava/lang/String;)V");
-		printf("method id success\n");
 		jmethodID methodId2=env->GetMethodID( userDataClass, "setDrv_version", "(Ljava/lang/String;)V");
-		printf("method id success2\n");
 		jstrBuf = env->NewStringUTF(output_attrs.api_version);
-		printf("string buf success\n");
 		env->CallObjectMethod(info, methodId, jstrBuf);
-		printf("object method call success\n");
 		jstrBuf = env->NewStringUTF(output_attrs.drv_version);
-		printf("string buf2 success\n");
 		env->CallObjectMethod(info, methodId2, jstrBuf);
-		printf("jdk values set: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
+		//printf("jdk values set: %s driver version: %s\n", output_attrs.api_version, output_attrs.drv_version);
 	} else {
 	    printf("rknn_query_sdk_version error ret=%d\n", ret);
 	}
@@ -178,34 +165,24 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1IO_1num
   (JNIEnv* env, jobject thisObj, jobject info) {
 	rknn_input_output_num io_num;
 	//ret = rknn_query(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
-	 printf("query handle\n");
-	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
-	  if (!handle) {
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
-	  }
-	  printf("query init %p\n",handle);
-	  dlerror();
-	  nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
-	  printf("function pointer query %p\n",nn_query);
-	  //error = dlerror();
-	  //if (error!= NULL)  {
-		//	  printf("dlerr=%s\n",error);
-		//	  return RKNN_ERR_FAIL;
-	  //}
-	  dlerror();
-	  printf("Preparing query lookup\n");
-	  ret = (*nn_query)(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
-	  printf("query lookup success\n");
-	  dlclose(handle);
+	}
+	dlerror();
+	nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	dlerror();
+	ret = (*nn_query)(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
+	dlclose(handle);
 	if (ret >= RKNN_SUCC) {
-		printf("model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
+		//printf("model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
 		jclass userDataClass=env->GetObjectClass(info);
 		jmethodID methodId=env->GetMethodID(userDataClass, "setN_input", "(I)V");
 		jmethodID methodId2=env->GetMethodID(userDataClass, "setN_output", "(I)V");
 		env->CallObjectMethod(info, methodId, io_num.n_input);
 		env->CallObjectMethod(info, methodId2, io_num.n_output);
-		printf("jdk values set: model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
+		//printf("jdk values set: model input num: %d, output num: %d\n", io_num.n_input, io_num.n_output);
 	} else {
 	    printf("rknn_query_in_out_num error ret=%d\n", ret);
 	}
@@ -213,12 +190,61 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1IO_1num
 }
 
 /*
+ * Get the index from the input java instance and place it into outgoing buffer
+ * to indicate to the query which object to process.
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_input_attr
  * Signature: (Lcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1attr
   (JNIEnv* env, jobject thisObj, jobject info) {
+	jstring jstrBuf;
+	rknn_tensor_attr input_attr;
+	memset(&input_attr, 0, sizeof(input_attr));
+    //ret = rknn_query(ctx, RKNN_QUERY_INPUT_ATTR, &(input_attrs[i]), sizeof(rknn_tensor_attr));
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	}
+	dlerror();
+	jclass userDataClass=env->GetObjectClass(info);
+	jmethodID getIndex=env->GetMethodID(userDataClass, "getIndex", "()I");
+	input_attr.index = 	env->CallIntMethod(info, getIndex);
+	nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	dlerror();
+	ret = (*nn_query)(ctx, RKNN_QUERY_INPUT_ATTR, &input_attr, sizeof(input_attr));
+	dlclose(handle);
+	if (ret >= RKNN_SUCC) {
+		dump_tensor_attr(&input_attr);
+		jmethodID setN_dims=env->GetMethodID(userDataClass, "setN_dims", "(I)V");
+		jmethodID setDim=env->GetMethodID(userDataClass, "setDim", "(II)V");
+		jmethodID setN_elems=env->GetMethodID(userDataClass, "setN_elems", "(I)V");
+		jmethodID setName=env->GetMethodID(userDataClass, "setName", "(Ljava/lang/String;)V");
+		jmethodID setSize=env->GetMethodID(userDataClass, "setSize", "(I)V");
+		jmethodID setFmt=env->GetMethodID(userDataClass, "setFmt", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;)V");
+		jmethodID setType=env->GetMethodID(userDataClass, "setType", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;)V");
+		jmethodID setQnt_type=env->GetMethodID(userDataClass, "setQnt_type", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;)V");
+		jmethodID setZp=env->GetMethodID(userDataClass, "setZp", "(I)V");
+		jmethodID setScale=env->GetMethodID(userDataClass, "setScale", "(F)V");
+		jmethodID setFl=env->GetMethodID(userDataClass, "setFl", "(B)V");
+		jmethodID setW_stride=env->GetMethodID(userDataClass, "setW_stride", "(I)V");
+		jmethodID setSize_with_stride=env->GetMethodID(userDataClass, "setSize_with_stride", "(I)V");
+		jmethodID setPass_through=env->GetMethodID(userDataClass, "setPass_through", "(B)V");
+		jmethodID setH_stride=env->GetMethodID(userDataClass, "setH_stride", "(I)V");
+		env->CallObjectMethod(info, setN_dims, input_attr.n_dims);
+		env->CallObjectMethod(info, setDim, 0, input_attr.dims[0]);
+		env->CallObjectMethod(info, setDim, 1, input_attr.dims[1]);
+		env->CallObjectMethod(info, setDim, 2, input_attr.dims[2]);
+		env->CallObjectMethod(info, setDim, 3, input_attr.dims[3]);
+		env->CallObjectMethod(info, setN_elems, input_attr.n_elems);
+		jstrBuf = env->NewStringUTF(input_attr.name);
+		env->CallObjectMethod(info, setName, jstrBuf);
+		env->CallObjectMethod(info, setSize, input_attr.size);
+		printf("jdk input attr tensor values set\r");
+	} else {
+	    printf("rknn_query_input_attr error ret=%d\n", ret);
+	}
 	return ret;
 }
 
@@ -251,20 +277,17 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
   (JNIEnv* env, jobject thisObj, jobject extend) {
 	/* we will have to extract the extend structure and use it at some point */
 	//ret = rknn_run(ctx, NULL);
-	 printf("run handle\n");
 	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
 	  if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
 	  }
-	  printf("run init %p\n",handle);
+	  //printf("run init %p\n",handle);
 	  dlerror();
 	  nn_run =(int (*)(rknn_context, rknn_run_extend*)) dlsym(handle, "rknn_run");
-	  printf("function pointer run %p\n",nn_run);
+	  //printf("function pointer run %p\n",nn_run);
 	  dlerror();
-	  printf("Preparing run lookup\n");
 	  ret = (*nn_run)(ctx, NULL);
-	  printf("run lookup success\n");
 	  dlclose(handle);
 	return ret;
 }
