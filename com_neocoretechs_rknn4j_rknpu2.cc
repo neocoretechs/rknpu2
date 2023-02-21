@@ -216,7 +216,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 	ret = (*nn_query)(ctx, RKNN_QUERY_INPUT_ATTR, &input_attr, sizeof(input_attr));
 	dlclose(handle);
 	if (ret >= RKNN_SUCC) {
-		dump_tensor_attr(&input_attr);
+		//dump_tensor_attr(&input_attr);
 		jmethodID setN_dims=env->GetMethodID(userDataClass, "setN_dims", "(I)V");
 		jmethodID setDim=env->GetMethodID(userDataClass, "setDim", "(II)V");
 		jmethodID setN_elems=env->GetMethodID(userDataClass, "setN_elems", "(I)V");
@@ -347,7 +347,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		env->CallObjectMethod(info, setSize_with_stride, input_attr.size_with_stride);
 		env->CallObjectMethod(info, setPass_through, input_attr.pass_through);
 		env->CallObjectMethod(info, setH_stride, input_attr.h_stride);
-		printf("jdk input attr tensor values set\n");
+		//printf("jdk input attr tensor values set\n");
 	} else {
 	    printf("rknn_query_input_attr error ret=%d\n", ret);
 	}
@@ -355,12 +355,168 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 }
 
 /*
+ * Get the index from the input java instance and place it into outgoing buffer
+ * to indicate to the query which object to process.
+ * Identical process for input attributes, but query output
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_output_attr
  * Signature: (Lcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1attr
   (JNIEnv* env, jobject thisObj, jobject info) {
+	jstring jstrBuf;
+	rknn_tensor_attr output_attr;
+	memset(&output_attr, 0, sizeof(output_attr));
+    //ret = rknn_query(ctx, RKNN_QUERY_INPUT_ATTR, &(output_attrs[i]), sizeof(rknn_tensor_attr));
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	}
+	dlerror();
+	jclass userDataClass=env->GetObjectClass(info);
+	jmethodID getIndex=env->GetMethodID(userDataClass, "getIndex", "()I");
+	output_attr.index = 	env->CallIntMethod(info, getIndex);
+	nn_query =(int (*)(rknn_context, rknn_query_cmd, void*, uint32_t)) dlsym(handle, "rknn_query");
+	dlerror();
+	ret = (*nn_query)(ctx, RKNN_QUERY_OUTPUT_ATTR, &output_attr, sizeof(output_attr));
+	dlclose(handle);
+	if (ret >= RKNN_SUCC) {
+		//dump_tensor_attr(&output_attr);
+		jmethodID setN_dims=env->GetMethodID(userDataClass, "setN_dims", "(I)V");
+		jmethodID setDim=env->GetMethodID(userDataClass, "setDim", "(II)V");
+		jmethodID setN_elems=env->GetMethodID(userDataClass, "setN_elems", "(I)V");
+		jmethodID setName=env->GetMethodID(userDataClass, "setName", "(Ljava/lang/String;)V");
+		jmethodID setSize=env->GetMethodID(userDataClass, "setSize", "(I)V");
+		jmethodID setFmt=env->GetMethodID(userDataClass, "setFmt", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;)V");
+		jmethodID setType=env->GetMethodID(userDataClass, "setType", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;)V");
+		jmethodID setQnt_type=env->GetMethodID(userDataClass, "setQnt_type", "(Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;)V");
+		jmethodID setZp=env->GetMethodID(userDataClass, "setZp", "(I)V");
+		jmethodID setScale=env->GetMethodID(userDataClass, "setScale", "(F)V");
+		jmethodID setFl=env->GetMethodID(userDataClass, "setFl", "(B)V");
+		jmethodID setW_stride=env->GetMethodID(userDataClass, "setW_stride", "(I)V");
+		jmethodID setSize_with_stride=env->GetMethodID(userDataClass, "setSize_with_stride", "(I)V");
+		jmethodID setPass_through=env->GetMethodID(userDataClass, "setPass_through", "(B)V");
+		jmethodID setH_stride=env->GetMethodID(userDataClass, "setH_stride", "(I)V");
+		env->CallObjectMethod(info, setN_dims, output_attr.n_dims);
+		env->CallObjectMethod(info, setDim, 0, output_attr.dims[0]);
+		env->CallObjectMethod(info, setDim, 1, output_attr.dims[1]);
+		env->CallObjectMethod(info, setDim, 2, output_attr.dims[2]);
+		env->CallObjectMethod(info, setDim, 3, output_attr.dims[3]);
+		env->CallObjectMethod(info, setN_elems, output_attr.n_elems);
+		jstrBuf = env->NewStringUTF(output_attr.name);
+		env->CallObjectMethod(info, setName, jstrBuf);
+		env->CallObjectMethod(info, setSize, output_attr.size);
+		// tensor format enum conversion
+		jclass tensorFmtClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_format");
+		jfieldID tensorFmtField;
+		// determine which enum corresponds to our java enum field
+		switch(output_attr.fmt) {
+			case RKNN_TENSOR_NCHW:                               /* data format is NCHW. */
+				tensorFmtField = env->GetStaticFieldID(tensorFmtClass , "RKNN_TENSOR_NCHW", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+				break;
+			case RKNN_TENSOR_NHWC:                                   /* data format is NHWC. */
+				tensorFmtField = env->GetStaticFieldID(tensorFmtClass , "RKNN_TENSOR_NHWC", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+				break;
+			case RKNN_TENSOR_NC1HWC2:                                /* data format is NC1HWC2. */
+				tensorFmtField = env->GetStaticFieldID(tensorFmtClass , "RKNN_TENSOR_NC1HWC2", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+				break;
+			case RKNN_TENSOR_UNDEFINED:
+				tensorFmtField = env->GetStaticFieldID(tensorFmtClass , "RKNN_TENSOR_UNDEFINED", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+				break;
+			case RKNN_TENSOR_FORMAT_MAX:
+				tensorFmtField = env->GetStaticFieldID(tensorFmtClass , "RKNN_TENSOR_FORMAT_MAX", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+				break;
+			default:
+				return RKNN_ERR_FAIL;
+		}
+		// now get the corresponding java enum
+		jobject state = env->GetStaticObjectField(tensorFmtClass, tensorFmtField);
+		// now call out mutator method to set the main target java instance with our newly created java enum
+		env->CallObjectMethod(info, setFmt, state);
+		//
+		// tensor type enum conversion
+		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
+		jfieldID tensorTypeField;
+		// determine which enum corresponds to our java enum field
+		switch(output_attr.type) {
+			case RKNN_TENSOR_FLOAT32:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_FLOAT32", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_FLOAT16:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_FLOAT16", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_INT8:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_INT8", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_UINT8:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_UINT8", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_INT16:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_INT16", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_UINT16:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_UINT16", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_INT32:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_INT32", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_UINT32:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_UINT32", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_INT64:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_INT64", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_BOOL:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_BOOL", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			case RKNN_TENSOR_TYPE_MAX:
+				tensorTypeField = env->GetStaticFieldID(tensorTypeClass , "RKNN_TENSOR_TYPE_MAX", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+				break;
+			default:
+				return RKNN_ERR_FAIL;
+		}
+		// now get the corresponding java enum
+		state = env->GetStaticObjectField(tensorTypeClass, tensorTypeField);
+		// now call out mutator method to set the main target java instance with our newly created java enum
+		env->CallObjectMethod(info, setType, state);
+		//
+		// tensor Qnt_type enum conversion
+		jclass tensorQntTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type");
+		jfieldID tensorQntTypeField;
+		// determine which enum corresponds to our java enum field
+		switch(output_attr.qnt_type) {
+			case RKNN_TENSOR_QNT_NONE:
+				tensorQntTypeField = env->GetStaticFieldID(tensorQntTypeClass , "RKNN_TENSOR_QNT_NONE", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;");
+				break;
+			case RKNN_TENSOR_QNT_DFP:
+				tensorQntTypeField = env->GetStaticFieldID(tensorQntTypeClass , "RKNN_TENSOR_QNT_DFP", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;");
+				break;
+			case RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC:
+				tensorQntTypeField = env->GetStaticFieldID(tensorQntTypeClass , "RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;");
+				break;
+			case RKNN_TENSOR_QNT_MAX:
+				tensorQntTypeField = env->GetStaticFieldID(tensorQntTypeClass , "RKNN_TENSOR_QNT_MAX", "Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type;");
+				break;
+			default:
+				return RKNN_ERR_FAIL;
+		}
+		// now get the corresponding java enum
+		state = env->GetStaticObjectField(tensorQntTypeClass, tensorQntTypeField);
+		// now call out mutator method to set the main target java instance with our newly created java enum
+		env->CallObjectMethod(info, setQnt_type, state);
+		// set the rest of the fields via mutator
+		env->CallObjectMethod(info, setZp, output_attr.zp);
+		env->CallObjectMethod(info, setScale, output_attr.scale);
+		env->CallObjectMethod(info, setFl, output_attr.fl);
+		env->CallObjectMethod(info, setW_stride, output_attr.w_stride);
+		env->CallObjectMethod(info, setSize_with_stride, output_attr.size_with_stride);
+		env->CallObjectMethod(info, setPass_through, output_attr.pass_through);
+		env->CallObjectMethod(info, setH_stride, output_attr.h_stride);
+		//printf("jdk output attr tensor values set\n");
+	} else {
+	    printf("rknn_query_output_attr error ret=%d\n", ret);
+	}
 	return ret;
 }
 
