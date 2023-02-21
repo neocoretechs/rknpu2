@@ -339,6 +339,14 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		state = env->GetStaticObjectField(tensorQntTypeClass, tensorQntTypeField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
 		env->CallObjectMethod(info, setQnt_type, state);
+		// set the rest of the fields via mutator
+		env->CallObjectMethod(info, setZp, input_attr.zp);
+		env->CallObjectMethod(info, setScale, input_attr.scale);
+		env->CallObjectMethod(info, setFl, input_attr.fl);
+		env->CallObjectMethod(info, setW_stride, input_attr.w_stride);
+		env->CallObjectMethod(info, setSize_with_stride, input_attr.size_with_stride);
+		env->CallObjectMethod(info, setPass_through, input_attr.pass_through);
+		env->CallObjectMethod(info, setH_stride, input_attr.h_stride);
 		printf("jdk input attr tensor values set\n");
 	} else {
 	    printf("rknn_query_input_attr error ret=%d\n", ret);
