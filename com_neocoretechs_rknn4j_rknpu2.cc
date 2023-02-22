@@ -25,6 +25,7 @@
   int (*nn_query)(rknn_context, rknn_query_cmd, void*, uint32_t);
   int (*nn_run)(rknn_context, rknn_run_extend*);
   int (*nn_inputs_set)(rknn_context, uint32_t, rknn_input[]);
+  int (*nn_outputs_get)(rknn_context, uint32_t, rknn_output[], rknn_output_extend*);
   int (*nn_destroy)(rknn_context);
   char *error;
 
@@ -533,7 +534,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 	rknn_input npuinputs[ninputs];
 	memset(npuinputs, 0, sizeof(npuinputs));
 	for(int i = 0; i < ninputs; i++) {
-		printf("Getting java aray element %d\n",i);
+		//printf("Getting java array element %d\n",i);
 		jobject input = env->GetObjectArrayElement(inputs, i);
 		jclass rknnInputClass=env->GetObjectClass(input);
 		// rknnInputClass should now be rknn_input
@@ -550,7 +551,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
 		jmethodID tensorTypeOrdinalMethod = env->GetMethodID(tensorTypeClass, "ordinal","()I");
 		jint tensorTypeOrdinal = env->CallIntMethod(tensorType, tensorTypeOrdinalMethod);
-		printf("Tensor type ordinal=%d\n",tensorTypeOrdinal);
+		//printf("Tensor type ordinal=%d\n",tensorTypeOrdinal);
 		// determine which enum corresponds to our java enum field
 		switch(tensorTypeOrdinal) {
 			case 0:
@@ -591,7 +592,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 		jclass tensorFmtClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_format");
 		jmethodID tensorFmtOrdinalMethod = env->GetMethodID(tensorFmtClass, "ordinal","()I");
 		jint tensorFmtOrdinal = env->CallIntMethod(tensorFmt, tensorFmtOrdinalMethod);
-		printf("Tensor fmt ordinal=%d\n",tensorFmtOrdinal);
+		//printf("Tensor fmt ordinal=%d\n",tensorFmtOrdinal);
 		// determine which enum corresponds to our java enum field
 		switch(tensorFmtOrdinal) {
 			case 0:
@@ -626,7 +627,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 	dlerror();
 	nn_inputs_set =(int (*)(rknn_context, uint32_t, rknn_input[])) dlsym(handle, "rknn_inputs_set");
 	dlerror();
-	printf("Calling function pointer %p\n",nn_inputs_set);
+	//printf("Calling function pointer %p\n",nn_inputs_set);
 	ret = (*nn_inputs_set)(ctx, ninputs, npuinputs);
 	dlclose(handle);
 	return ret;
@@ -657,16 +658,82 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
 }
 
 /*
+ * rknn_outputs_get
+ *
+ *  wait for the inference to finish and get the outputs. this function will block until inference finishes.
+ * the results will set to outputs[].
+ *   input:
+ *       rknn_context context        the handle of context.
+ *       uint32_t n_outputs          the number of outputs.
+ *       rknn_output outputs[]       the arrays of output, see rknn_output.
+ *       rknn_output_extend*         the extend information of output.
+ *   return:
+ *      int                         error code.
+ *
+ * int rknn_outputs_get(rknn_context context, uint32_t n_outputs, rknn_output outputs[], rknn_output_extend* extend);
+ *
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_outputs_get
  * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_output;Lcom/neocoretechs/rknn4j/rknn_output_extend;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
   (JNIEnv* env, jobject thisObj, jint noutputs, jobjectArray outputsArray, jobject extend) {
+	rknn_output npuoutputs[noutputs];
+	memset(npuoutputs, 0, sizeof(npuoutputs));
+	for (int i = 0; i < noutputs; i++) {
+		printf("Getting java array element %d\n",i);
+		jobject output = env->GetObjectArrayElement(outputsArray, i);
+		jclass rknnOutputClass=env->GetObjectClass(output);
+		jmethodID getIndex=env->GetMethodID(rknnOutputClass, "getIndex", "()I");
+		npuoutputs[i].index = env->CallIntMethod(output, getIndex);
+		jmethodID getWant_float=env->GetMethodID(rknnOutputClass, "getWant_float", "()Z");
+		npuoutputs[i].want_float = env->CallBooleanMethod(output, getWant_float) ? 1: 0;
+		jmethodID getIs_prealloc=env->GetMethodID(rknnOutputClass, "getIs_prealloc", "()Z");
+		npuoutputs[i].is_prealloc = env->CallBooleanMethod(output, getIs_prealloc) ? 1: 0;
+	}
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	}
+	dlerror();
+	nn_outputs_get =(int (*)(rknn_context, uint32_t, rknn_output[], rknn_output_extend*)) dlsym(handle, "rknn_outputs_get");
+	dlerror();
+	//printf("Calling function pointer %p\n",nn_inputs_set);
+	ret = (*nn_outputs_get)(ctx, noutputs, npuoutputs, NULL);
+	dlclose(handle);
+	// now transfer the values from the call
+	if(ret >= RKNN_SUCC) {
+		for (int i = 0; i < noutputs; i++) {
+			printf("Setting java array element %d\n",i);
+			jobject output = env->GetObjectArrayElement(outputsArray, i);
+			jclass rknnOutputClass=env->GetObjectClass(output);
+			jmethodID setBuf=env->GetMethodID(rknnOutputClass, "setBuf", "([B)V");
+			printf("Setting java byte array with size %d\n",npuoutputs[i].size);
+			jbyteArray jbuf = as_byte_array(env, (unsigned char*)npuoutputs[i].buf, npuoutputs[i].size);
+			env->CallObjectMethod(output, setBuf, jbuf);
+			jmethodID setSize=env->GetMethodID(rknnOutputClass, "setSize", "()I");
+			env->CallObjectMethod(output, setSize, npuoutputs[i].size);
+		}
+	}
 	return ret;
 }
 
 /*
+ * rknn_outputs_release
+ *
+ * release the outputs obtained by rknn_outputs_get.
+ * after calling, the rknn_output[x].buf get from rknn_outputs_get will
+ * also be freed when rknn_output[x].is_prealloc = FALSE.
+ *
+ *   input:
+ *       rknn_context context        the handle of context.
+ *       uint32_t n_ouputs           the number of outputs.
+ *       rknn_output outputs[]       the arrays of output.
+ *   return:
+ *       int                         error code
+ *
+ * int rknn_outputs_release(rknn_context context, uint32_t n_ouputs, rknn_output outputs[]);
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_outputs_release
  * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_output;)I
