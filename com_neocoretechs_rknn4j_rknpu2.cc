@@ -24,6 +24,7 @@
   int (*nn_init)(rknn_context*, void*, uint32_t, uint32_t, rknn_init_extend*);
   int (*nn_query)(rknn_context, rknn_query_cmd, void*, uint32_t);
   int (*nn_run)(rknn_context, rknn_run_extend*);
+  int (*nn_inputs_set)(rknn_context, uint32_t, rknn_input[]);
   int (*nn_destroy)(rknn_context);
   char *error;
 
@@ -521,12 +522,42 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 }
 
 /*
+ * Take an array of inputs and use it to set up run
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_inputs_set
  * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_input;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
   (JNIEnv* env, jobject thisObj, jint ninputs, jobjectArray inputs) {
+	//int ret = rknn_inputs_set(ctx, io_num.n_input, inputs);
+	rknn_input npuinputs[ninputs];
+	memset(npuinputs, 0, sizeof(npuinputs));
+	for(int i = 0; i < ninputs; i++) {
+		printf("Getting java aray element %d\n",i);
+		jobject input = env->GetObjectArrayElement(inputs, i);
+		printf("Got java aray element %d\n",i);
+		npuinputs[i].index        = i;
+		npuinputs[i].type         = RKNN_TENSOR_INT8;
+		npuinputs[i].size         = 640 * 640 * 3;
+		npuinputs[i].fmt          = RKNN_TENSOR_NHWC;
+		npuinputs[i].pass_through = 0;
+		void* resize_buf = nullptr;
+		printf("Setting image buff\n");
+		resize_buf = malloc(npuinputs[i].size);
+		memset(resize_buf, 0x00, npuinputs[i].size);
+		npuinputs[i].buf = resize_buf;
+	}
+	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	if (!handle) {
+		  printf("dlerr=%s\n",dlerror());
+		  return RKNN_ERR_FAIL;
+	}
+	dlerror();
+	nn_inputs_set =(int (*)(rknn_context, uint32_t, rknn_input[])) dlsym(handle, "rknn_inputs_set");
+	dlerror();
+	printf("Calling function pointer %p\n",nn_inputs_set);
+	ret = (*nn_inputs_set)(ctx, ninputs, npuinputs);
+	dlclose(handle);
 	return ret;
 }
 
