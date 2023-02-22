@@ -535,17 +535,68 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 	for(int i = 0; i < ninputs; i++) {
 		printf("Getting java aray element %d\n",i);
 		jobject input = env->GetObjectArrayElement(inputs, i);
+		jclass rknnInputClass=env->GetObjectClass(input);
+		// rknnInputClass should now be rknn_input
+		jmethodID getBuf=env->GetMethodID(rknnInputClass, "getBuf", "()[B");
+		jmethodID getType=env->GetMethodID(rknnInputClass, "getType", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+		jmethodID getSize=env->GetMethodID(rknnInputClass, "getSize", "()I");
+		jmethodID getFmt=env->GetMethodID(rknnInputClass, "getFmt", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+		jmethodID getPass_through=env->GetMethodID(rknnInputClass, "getPass_through", "()Z");
+		jbyteArray jbuf = (jbyteArray)env->CallObjectMethod(input, getBuf);
+		jbyte* b = env->GetByteArrayElements(jbuf, NULL);
+		npuinputs[i].buf = (void*)b;
+		// translate the enums via ordinal
+		jobject tensorType = env->CallObjectMethod(input, getType);
+		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
+		jmethodID tensorTypeOrdinalMethod = env->GetMethodID(tensorTypeClass, "ordinal","()I");
+		jint tensorTypeOrdinal = env->CallIntMethod(tensorType, tensorTypeOrdinalMethod);
+		printf("Tensor type ordinal=%d\n",tensorTypeOrdinal);
+		// determine which enum corresponds to our java enum field
+		switch(tensorTypeOrdinal) {
+			case 0:
+				npuinputs[i].type=RKNN_TENSOR_FLOAT32;
+				break;
+			case 1:
+				npuinputs[i].type=RKNN_TENSOR_FLOAT16;
+				break;
+			case 2:
+				npuinputs[i].type=RKNN_TENSOR_INT8;
+				break;
+			case 3:
+				npuinputs[i].type=RKNN_TENSOR_UINT8;
+				break;
+			case 4:
+				npuinputs[i].type=RKNN_TENSOR_INT16;
+				break;
+			case 5:
+				npuinputs[i].type=RKNN_TENSOR_UINT16;
+				break;
+			case 6:
+				npuinputs[i].type=RKNN_TENSOR_INT32;
+				break;
+			case 7:
+				npuinputs[i].type=RKNN_TENSOR_UINT32;
+				break;
+			case 8:
+				npuinputs[i].type=RKNN_TENSOR_INT64;
+				break;
+			case 9:
+				npuinputs[i].type=RKNN_TENSOR_BOOL;
+				break;
+			case 10:
+			default:
+				return RKNN_ERR_FAIL;
+		}
+		npuinputs[i].size = env->CallIntMethod(input, getSize);
+		npuinputs[i].pass_through = env->CallBooleanMethod(input, getPass_through) ? 1 : 0;
+		//env->ReleaseByteArrayElements(jbuf, b, 0);
 		printf("Got java aray element %d\n",i);
 		npuinputs[i].index        = i;
-		npuinputs[i].type         = RKNN_TENSOR_INT8;
-		npuinputs[i].size         = 640 * 640 * 3;
+		//npuinputs[i].type         = RKNN_TENSOR_INT8;
+		//npuinputs[i].size         = 640 * 640 * 3;
 		npuinputs[i].fmt          = RKNN_TENSOR_NHWC;
-		npuinputs[i].pass_through = 0;
-		void* resize_buf = nullptr;
-		printf("Setting image buff\n");
-		resize_buf = malloc(npuinputs[i].size);
-		memset(resize_buf, 0x00, npuinputs[i].size);
-		npuinputs[i].buf = resize_buf;
+		//npuinputs[i].pass_through = 0;
+
 	}
 	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
 	if (!handle) {
