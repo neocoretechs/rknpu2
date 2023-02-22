@@ -587,14 +587,34 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 			default:
 				return RKNN_ERR_FAIL;
 		}
+		jobject tensorFmt = env->CallObjectMethod(input, getFmt);
+		jclass tensorFmtClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_format");
+		jmethodID tensorFmtOrdinalMethod = env->GetMethodID(tensorFmtClass, "ordinal","()I");
+		jint tensorFmtOrdinal = env->CallIntMethod(tensorFmt, tensorFmtOrdinalMethod);
+		printf("Tensor fmt ordinal=%d\n",tensorFmtOrdinal);
+		// determine which enum corresponds to our java enum field
+		switch(tensorFmtOrdinal) {
+			case 0:
+				npuinputs[i].fmt=RKNN_TENSOR_NCHW;
+				break;
+			case 1:
+				npuinputs[i].fmt=RKNN_TENSOR_NHWC;
+				break;
+			case 2:
+				npuinputs[i].fmt=RKNN_TENSOR_NC1HWC2;
+				break;
+			case 3:
+			case 4:
+			default:
+				return RKNN_ERR_FAIL;
+		}
 		npuinputs[i].size = env->CallIntMethod(input, getSize);
 		npuinputs[i].pass_through = env->CallBooleanMethod(input, getPass_through) ? 1 : 0;
 		//env->ReleaseByteArrayElements(jbuf, b, 0);
-		printf("Got java aray element %d\n",i);
 		npuinputs[i].index        = i;
 		//npuinputs[i].type         = RKNN_TENSOR_INT8;
 		//npuinputs[i].size         = 640 * 640 * 3;
-		npuinputs[i].fmt          = RKNN_TENSOR_NHWC;
+		//npuinputs[i].fmt          = RKNN_TENSOR_NHWC;
 		//npuinputs[i].pass_through = 0;
 
 	}
