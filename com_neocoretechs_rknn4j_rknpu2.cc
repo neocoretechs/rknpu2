@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <dlfcn.h>
 
 #include "rknn_api.h"
 
@@ -80,7 +79,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
 	if (ret < RKNN_SUCC) {
 	    printf("rknn_init error ret=%d\n", ret);
 	} else {
-		  printf("rknn_init success=%d ctx=%ld\n", ret,ctx);
+		  //printf("rknn_init success=%d ctx=%ld\n", ret,ctx);
 	}
 	  return ret;
 }
