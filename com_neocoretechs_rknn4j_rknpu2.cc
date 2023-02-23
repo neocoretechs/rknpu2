@@ -26,6 +26,7 @@
   int (*nn_run)(rknn_context, rknn_run_extend*);
   int (*nn_inputs_set)(rknn_context, uint32_t, rknn_input[]);
   int (*nn_outputs_get)(rknn_context, uint32_t, rknn_output[], rknn_output_extend*);
+  int (*nn_outputs_release)(rknn_context, uint32_t, rknn_output[]);
   int (*nn_destroy)(rknn_context);
   char *error;
 
@@ -681,7 +682,6 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 	rknn_output npuoutputs[noutputs];
 	memset(npuoutputs, 0, sizeof(npuoutputs));
 	for (int i = 0; i < noutputs; i++) {
-		printf("Getting java array element %d\n",i);
 		jobject output = env->GetObjectArrayElement(outputsArray, i);
 		jclass rknnOutputClass=env->GetObjectClass(output);
 		jmethodID getIndex=env->GetMethodID(rknnOutputClass, "getIndex", "()I");
@@ -699,23 +699,27 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 	dlerror();
 	nn_outputs_get =(int (*)(rknn_context, uint32_t, rknn_output[], rknn_output_extend*)) dlsym(handle, "rknn_outputs_get");
 	dlerror();
-	//printf("Calling function pointer %p\n",nn_inputs_set);
 	ret = (*nn_outputs_get)(ctx, noutputs, npuoutputs, NULL);
 	dlclose(handle);
 	// now transfer the values from the call
 	if(ret >= RKNN_SUCC) {
 		for (int i = 0; i < noutputs; i++) {
-			printf("Setting java array element %d\n",i);
 			jobject output = env->GetObjectArrayElement(outputsArray, i);
 			jclass rknnOutputClass=env->GetObjectClass(output);
 			jmethodID setBuf=env->GetMethodID(rknnOutputClass, "setBuf", "([B)V");
-			printf("Setting java byte array with size %d\n",npuoutputs[i].size);
 			jbyteArray jbuf = as_byte_array(env, (unsigned char*)npuoutputs[i].buf, npuoutputs[i].size);
 			env->CallObjectMethod(output, setBuf, jbuf);
-			jmethodID setSize=env->GetMethodID(rknnOutputClass, "setSize", "()I");
+			jmethodID setSize=env->GetMethodID(rknnOutputClass, "setSize", "(I)V");
 			env->CallObjectMethod(output, setSize, npuoutputs[i].size);
 		}
+	} else {
+		return ret;
 	}
+	dlerror();
+	nn_outputs_release =(int (*)(rknn_context, uint32_t, rknn_output[])) dlsym(handle, "rknn_outputs_release");
+	dlerror();
+	ret = (*nn_outputs_release)(ctx, noutputs, npuoutputs);
+	dlclose(handle);
 	return ret;
 }
 
