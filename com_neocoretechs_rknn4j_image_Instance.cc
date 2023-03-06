@@ -36,7 +36,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
 		void* resize_buf = nullptr;
 		if (img_width != width || img_height != height) {
 			cv::Mat newimg = img.clone();
-			printf("resize %d %d to %d %d\n", img.cols, img.rows, width, height);
+			//printf("resize %d %d to %d %d\n", img.cols, img.rows, width, height);
 			cv::resize(img, newimg, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
 			env->ReleaseByteArrayElements(byteData, _b_data, 0);
 			return as_byte_array(env, newimg.data, height*width*channel);

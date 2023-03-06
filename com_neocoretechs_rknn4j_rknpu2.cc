@@ -31,8 +31,18 @@
 
   jbyteArray as_byte_array(JNIEnv* env, unsigned char* buf, int len) {
       jbyteArray array = env->NewByteArray(len);
-      env->SetByteArrayRegion(array, 0, len, (jbyte*)(buf));
+      env->SetByteArrayRegion(array, (jsize)0, (jsize)len, (jbyte*)(buf));
       return array;
+	  //CREATE A NEW BYTE ARRAY
+	  //jbyteArray array = env->NewByteArray( len );
+	  //GET THE "EMPTY" ELEMENTS OF JAVA BYTE ARRAY
+	  //jbyte *bytes = env->GetByteArrayElements( array, 0);
+	  //memcpy(bytes,buf,len);
+	  //ADD THE BYTES COLLECTED TO THE JAVA BYTE ARRAY
+	  //env->SetByteArrayRegion(array, 0, (jsize)len, bytes );
+	  //NEED TO RELEASE THE BYTE ARRAY
+	  //env->ReleaseByteArrayElements(array, bytes, 0 );
+	  //return array;
   }
 
   unsigned char* as_unsigned_char_array(JNIEnv* env, jbyteArray array, int len) {
