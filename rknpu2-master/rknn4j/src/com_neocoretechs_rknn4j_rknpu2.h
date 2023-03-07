@@ -7,94 +7,93 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_init
- * Signature: ([BII)I
+ * Signature: ([BII)J
  */
-JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
+JNIEXPORT jlong JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
   (JNIEnv *, jobject, jbyteArray, jint, jint);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_init2
- * Signature: ([BIILcom/neocoretechs/rknn4j/rknn_init_extend;)I
+ * Signature: ([BIILcom/neocoretechs/rknn4j/rknn_init_extend;)J
  */
-JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init2
+JNIEXPORT jlong JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init2
   (JNIEnv *, jobject, jbyteArray, jint, jint, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_destroy
- * Signature: ()I
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1destroy
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_sdk
- * Signature: (Lcom/neocoretechs/rknn4j/rknn_sdk_version;)I
+ * Signature: (JLcom/neocoretechs/rknn4j/rknn_sdk_version;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_IO_num
- * Signature: (Lcom/neocoretechs/rknn4j/rknn_input_output_num;)I
+ * Signature: (JLcom/neocoretechs/rknn4j/rknn_input_output_num;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1IO_1num
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_input_attr
- * Signature: (Lcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
+ * Signature: (JLcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1attr
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_query_output_attr
- * Signature: (Lcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
+ * Signature: (JLcom/neocoretechs/rknn4j/rknn_tensor_attr;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1attr
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_inputs_set
- * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_input;)I
+ * Signature: (JI[Lcom/neocoretechs/rknn4j/rknn_input;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
-  (JNIEnv *, jobject, jint, jobjectArray);
+  (JNIEnv *, jobject, jlong, jint, jobjectArray);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_run
- * Signature: (Lcom/neocoretechs/rknn4j/rknn_run_extend;)I
+ * Signature: (JLcom/neocoretechs/rknn4j/rknn_run_extend;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jlong, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_outputs_get
- * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_output;Lcom/neocoretechs/rknn4j/rknn_output_extend;)I
+ * Signature: (JI[Lcom/neocoretechs/rknn4j/rknn_output;Lcom/neocoretechs/rknn4j/rknn_output_extend;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
-  (JNIEnv *, jobject, jint, jobjectArray, jobject);
+  (JNIEnv *, jobject, jlong, jint, jobjectArray, jobject);
 
 /*
  * Class:     com_neocoretechs_rknn4j_rknpu2
  * Method:    rknn_outputs_release
- * Signature: (I[Lcom/neocoretechs/rknn4j/rknn_output;)I
+ * Signature: (JI[Lcom/neocoretechs/rknn4j/rknn_output;)I
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1release
-  (JNIEnv *, jobject, jint, jobjectArray);
+  (JNIEnv *, jobject, jlong, jint, jobjectArray);
 
 #ifdef __cplusplus
 }
