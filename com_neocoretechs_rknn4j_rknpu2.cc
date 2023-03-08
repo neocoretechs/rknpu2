@@ -713,6 +713,10 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 	dlclose(handle);
 	// now transfer the values from the call
 	if(ret >= RKNN_SUCC) {
+		//float* predictions = (float*)npuoutputs[0].buf;
+		//for(int i = 0; i < 1917; i++) {
+		//	printf("prediction %d xmin=%f ymin=%f xmax=%f ymax=%f\n",i,predictions[i*4+0],predictions[i*4+1],predictions[i*4+2],predictions[i*4+3]);
+		//}
 		for (int i = 0; i < noutputs; i++) {
 			jobject output = env->GetObjectArrayElement(outputsArray, i);
 			jclass rknnOutputClass=env->GetObjectClass(output);
