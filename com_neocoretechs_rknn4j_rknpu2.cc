@@ -77,7 +77,7 @@ JNIEXPORT jlong JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1init
 	if(data == NULL)
 	    return (jlong)RKNN_ERR_MALLOC_FAIL;
 	//ret = rknn_init(&ctx, data, size, flag, NULL);
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return (jlong)RKNN_ERR_FAIL;
@@ -117,7 +117,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1destroy
   (JNIEnv* env, jobject thisObj, jlong ctx) {
 	// release
 	//ret = rknn_destroy(ctx);
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -141,7 +141,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1sdk
 	rknn_sdk_version output_attrs;
 	memset(&output_attrs, 0, sizeof(output_attrs));
 	//ret = rknn_query(ctx, RKNN_QUERY_SDK_VERSION, &output_attrs, sizeof(rknn_sdk_version));
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -178,7 +178,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1IO_1num
   (JNIEnv* env, jobject thisObj, jlong ctx, jobject info) {
 	rknn_input_output_num io_num;
 	//ret = rknn_query(ctx, RKNN_QUERY_IN_OUT_NUM, &io_num, sizeof(io_num));
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -215,7 +215,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 	rknn_tensor_attr input_attr;
 	memset(&input_attr, 0, sizeof(input_attr));
     //ret = rknn_query(ctx, RKNN_QUERY_INPUT_ATTR, &(input_attrs[i]), sizeof(rknn_tensor_attr));
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -381,7 +381,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 	rknn_tensor_attr output_attr;
 	memset(&output_attr, 0, sizeof(output_attr));
     //ret = rknn_query(ctx, RKNN_QUERY_INPUT_ATTR, &(output_attrs[i]), sizeof(rknn_tensor_attr));
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -630,7 +630,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 		//npuinputs[i].pass_through = 0;
 
 	}
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -653,7 +653,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1run
   (JNIEnv* env, jobject thisObj, jlong ctx, jobject extend) {
 	/* we will have to extract the extend structure and use it at some point */
 	//ret = rknn_run(ctx, NULL);
-	  handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	  handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	  if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;
@@ -701,7 +701,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 		jmethodID getIs_prealloc=env->GetMethodID(rknnOutputClass, "getIs_prealloc", "()Z");
 		npuoutputs[i].is_prealloc = env->CallBooleanMethod(output, getIs_prealloc) ? 1: 0;
 	}
-	handle = dlopen("/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j/librknnrt.so", RTLD_NOW);
+	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
 	if (!handle) {
 		  printf("dlerr=%s\n",dlerror());
 		  return RKNN_ERR_FAIL;

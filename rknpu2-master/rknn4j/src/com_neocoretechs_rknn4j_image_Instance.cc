@@ -24,6 +24,31 @@
  */
 JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
   (JNIEnv *env, jobject jobj, jbyteArray byteData, jint img_width, jint img_height, jint channel, jint width, jint height) {
+		jbyte* _b_data= env->GetByteArrayElements(byteData, 0);
+		cv::Mat mdata(img_height, img_width, CV_8UC3, (unsigned char *)_b_data);
+		cv::Mat orig_img = imdecode(mdata,1);
+		cv::Mat img;
+		cv::cvtColor(orig_img, img, cv::COLOR_BGR2RGB);
+		if (img_width != width || img_height != height) {
+			cv::Mat newimg = img.clone();
+			//printf("resize %d %d to %d %d\n", img.cols, img.rows, width, height);
+			cv::resize(img, newimg, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
+			env->ReleaseByteArrayElements(byteData, _b_data, 0);
+			return as_byte_array(env, newimg.data, height*width*channel);
+		}
+		env->ReleaseByteArrayElements(byteData, _b_data, 0);
+		// return img as java byte array
+		return as_byte_array(env, img.data, height*width*channel);
+
+}
+
+/*
+ * Class:     com_neocoretechs_rknn4j_image_Instance
+ * Method:    getRGARGB
+ * Signature: ([BIIIII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGARGB
+  (JNIEnv *env, jobject jobj, jbyteArray byteData, jint img_width, jint img_height, jint channel, jint width, jint height) {
 		memset(&src_rect, 0, sizeof(src_rect));
 		memset(&dst_rect, 0, sizeof(dst_rect));
 		memset(&src, 0, sizeof(src));
@@ -35,13 +60,9 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
 		cv::cvtColor(orig_img, img, cv::COLOR_BGR2RGB);
 		void* resize_buf = nullptr;
 		if (img_width != width || img_height != height) {
-			cv::Mat newimg = img.clone();
 			//printf("resize %d %d to %d %d\n", img.cols, img.rows, width, height);
-			cv::resize(img, newimg, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
-			env->ReleaseByteArrayElements(byteData, _b_data, 0);
-			return as_byte_array(env, newimg.data, height*width*channel);
-			/* must be aligned to stride 16 for RGA resize
-			printf("resize with RGA!\n");
+			/* must be aligned to stride 16 for RGA resize */
+			/*printf("resize with RGA!\n");*/
 			resize_buf = malloc(height * width * channel);
 			memset(resize_buf, 0x00, height * width * channel);
 
@@ -55,16 +76,19 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
 			IM_STATUS STATUS = imresize(src, dst);
 
 			// for debug
-			cv::Mat resize_img(cv::Size(width, height), CV_8UC3, resize_buf);
-			cv::imwrite("resize_input.jpg", resize_buf);
+			//cv::Mat resize_img(cv::Size(width, height), CV_8UC3, resize_buf);
+			//cv::imwrite("resize_input.jpg", resize_buf);
 			env->ReleaseByteArrayElements(byteData, _b_data, 0);
 			// return resize_img as java byte array
-			return as_byte_array(env, (unsigned char*)resize_buf, height*width*channel);
-			*/
+			jbyteArray retArray = as_byte_array(env, (unsigned char*)resize_buf, height*width*channel);
+			free(resize_buf);
+			return retArray;
 		}
 		env->ReleaseByteArrayElements(byteData, _b_data, 0);
 		// return img as java byte array
-		return as_byte_array(env, img.data, height*width*channel);
+		jbyteArray retArray = as_byte_array(env, img.data, height*width*channel);
+		img.release();
+		return retArray;
 		//inputs[0].buf = resize_buf;
 }
 

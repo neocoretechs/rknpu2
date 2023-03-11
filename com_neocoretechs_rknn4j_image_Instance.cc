@@ -80,11 +80,15 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGAR
 			//cv::imwrite("resize_input.jpg", resize_buf);
 			env->ReleaseByteArrayElements(byteData, _b_data, 0);
 			// return resize_img as java byte array
-			return as_byte_array(env, (unsigned char*)resize_buf, height*width*channel);
+			jbyteArray retArray = as_byte_array(env, (unsigned char*)resize_buf, height*width*channel);
+			free(resize_buf);
+			return retArray;
 		}
 		env->ReleaseByteArrayElements(byteData, _b_data, 0);
 		// return img as java byte array
-		return as_byte_array(env, img.data, height*width*channel);
+		jbyteArray retArray = as_byte_array(env, img.data, height*width*channel);
+		img.release();
+		return retArray;
 		//inputs[0].buf = resize_buf;
 }
 

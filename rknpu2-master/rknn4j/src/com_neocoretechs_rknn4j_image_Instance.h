@@ -14,7 +14,13 @@ extern "C" {
  */
 JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
   (JNIEnv *, jobject, jbyteArray, jint, jint, jint, jint, jint);
-
+/*
+ * Class:     com_neocoretechs_rknn4j_image_Instance
+ * Method:    getRGB
+ * Signature: ([BIIIII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGARGB
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jint, jint, jint);
 #ifdef __cplusplus
 }
 #endif
