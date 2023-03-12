@@ -622,7 +622,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 		}
 		npuinputs[i].size = env->CallIntMethod(input, getSize);
 		npuinputs[i].pass_through = env->CallBooleanMethod(input, getPass_through) ? 1 : 0;
-		//env->ReleaseByteArrayElements(jbuf, b, 0);
+		env->ReleaseByteArrayElements(jbuf, b, 0);
 		npuinputs[i].index        = i;
 		//npuinputs[i].type         = RKNN_TENSOR_INT8;
 		//npuinputs[i].size         = 640 * 640 * 3;
@@ -723,6 +723,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 			jmethodID setBuf=env->GetMethodID(rknnOutputClass, "setBuf", "([B)V");
 			jbyteArray jbuf = as_byte_array(env, (unsigned char*)npuoutputs[i].buf, npuoutputs[i].size);
 			env->CallObjectMethod(output, setBuf, jbuf);
+			//env->ReleaseByteArrayElements(jbuf, (jbyte*)npuoutputs[i].buf, 0);
 			jmethodID setSize=env->GetMethodID(rknnOutputClass, "setSize", "(I)V");
 			env->CallObjectMethod(output, setSize, npuoutputs[i].size);
 		}

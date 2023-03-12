@@ -82,14 +82,18 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGAR
 			// return resize_img as java byte array
 			jbyteArray retArray = as_byte_array(env, (unsigned char*)resize_buf, height*width*channel);
 			free(resize_buf);
+			img.release();
+			orig_img.release();
+			mdata.release();
 			return retArray;
 		}
 		env->ReleaseByteArrayElements(byteData, _b_data, 0);
 		// return img as java byte array
 		jbyteArray retArray = as_byte_array(env, img.data, height*width*channel);
 		img.release();
+		orig_img.release();
+		mdata.release();
 		return retArray;
-		//inputs[0].buf = resize_buf;
 }
 
 
