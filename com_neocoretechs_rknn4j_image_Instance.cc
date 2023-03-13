@@ -4,12 +4,23 @@
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
+//#include "opencv2/videoio.hpp"
 #include "rga.h"
   // init rga context
   rga_buffer_t src;
   rga_buffer_t dst;
   im_rect      src_rect;
   im_rect      dst_rect;
+  /*
+  int bcapture0 = 1;
+  int bcapture1 = 1;
+  int bcapture2 = 1;
+  int bcapture3 = 1;
+  cv::VideoCapture capture0;
+  cv::VideoCapture capture1;
+  cv::VideoCapture capture2;
+  cv::VideoCapture capture3;
+  */
 
   jbyteArray as_byte_array(JNIEnv* env, unsigned char* buf, int len) {
       jbyteArray array = env->NewByteArray(len);
@@ -96,4 +107,69 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGAR
 		return retArray;
 }
 
+/*
+ * Class:     com_neocoretechs_rknn4j_image_Instance
+ * Method:    getCapture
+ * Signature: (I)[B
 
+JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getCapture
+  (JNIEnv *env, jobject jobj, jint camdevice) {
+	cv::VideoCapture capture;
+	switch(camdevice) {
+	  case -1:
+		if(!bcapture0)
+			capture0.release();
+		if(!bcapture1)
+			capture1.release();
+		if(!bcapture2)
+			capture2.release();
+		if(!bcapture3)
+			capture3.release();
+		return NULL;
+	  case 0:
+		capture = capture0;
+		if(bcapture0) {
+			 capture.open(0);
+			 bcapture0 = 0;
+		}
+		break;
+	  case 1:
+		capture = capture1;
+		if(bcapture1) {
+			 capture.open(1);
+			 bcapture1 = 0;
+		}
+		break;
+	  case 2:
+		capture = capture2;
+		if(bcapture2) {
+			 capture.open(2);
+			 bcapture2 = 0;
+		}
+		break;
+	  case 3:
+		capture = capture3;
+		if(bcapture3) {
+			 capture.open(3);
+			 bcapture3 = 0;
+		}
+		break;
+	  default:
+		printf("Unknown camera device %d\n",camdevice);
+		return NULL;
+	}
+	if (!capture.isOpened()) {
+		printf("Failed to open webcam %d!",camdevice);
+		return NULL;
+	}
+
+	cv::Mat frame;
+	cv::Size size(640, 480); // set desired frame size
+
+	capture.read(frame);
+	//cv::resize(frame, frame, size); // resize the frame
+	jbyteArray jbytes = as_byte_array(env, frame.data, 640*480*3);
+	frame.release();
+	return jbytes;
+}
+*/

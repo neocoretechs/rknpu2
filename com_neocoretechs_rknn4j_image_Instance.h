@@ -16,11 +16,19 @@ JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGB
   (JNIEnv *, jobject, jbyteArray, jint, jint, jint, jint, jint);
 /*
  * Class:     com_neocoretechs_rknn4j_image_Instance
- * Method:    getRGB
+ * Method:    getRGARGB
  * Signature: ([BIIIII)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getRGARGB
   (JNIEnv *, jobject, jbyteArray, jint, jint, jint, jint, jint);
+/*
+ * Class:     com_neocoretechs_rknn4j_image_Instance
+ * Method:    getCapture
+ * Signature: (I)[B
+
+JNIEXPORT jbyteArray JNICALL Java_com_neocoretechs_rknn4j_image_Instance_getCapture
+  (JNIEnv *, jobject, jint);
+  */
 #ifdef __cplusplus
 }
 #endif
