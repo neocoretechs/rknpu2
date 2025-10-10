@@ -245,15 +245,15 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		jmethodID setSize_with_stride=env->GetMethodID(userDataClass, "setSize_with_stride", "(I)V");
 		jmethodID setPass_through=env->GetMethodID(userDataClass, "setPass_through", "(B)V");
 		jmethodID setH_stride=env->GetMethodID(userDataClass, "setH_stride", "(I)V");
-		env->CallObjectMethod(info, setN_dims, input_attr.n_dims);
-		env->CallObjectMethod(info, setDim, 0, input_attr.dims[0]);
-		env->CallObjectMethod(info, setDim, 1, input_attr.dims[1]);
-		env->CallObjectMethod(info, setDim, 2, input_attr.dims[2]);
-		env->CallObjectMethod(info, setDim, 3, input_attr.dims[3]);
-		env->CallObjectMethod(info, setN_elems, input_attr.n_elems);
+		env->CallVoidMethod(info, setN_dims, input_attr.n_dims);
+		env->CallVoidMethod(info, setDim, 0, input_attr.dims[0]);
+		env->CallVoidMethod(info, setDim, 1, input_attr.dims[1]);
+		env->CallVoidMethod(info, setDim, 2, input_attr.dims[2]);
+		env->CallVoidMethod(info, setDim, 3, input_attr.dims[3]);
+		env->CallVoidMethod(info, setN_elems, input_attr.n_elems);
 		jstrBuf = env->NewStringUTF(input_attr.name);
-		env->CallObjectMethod(info, setName, jstrBuf);
-		env->CallObjectMethod(info, setSize, input_attr.size);
+		env->CallVoidMethod(info, setName, jstrBuf);
+		env->CallVoidMethod(info, setSize, input_attr.size);
 		// tensor format enum conversion
 		jclass tensorFmtClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_format");
 		jfieldID tensorFmtField;
@@ -280,7 +280,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		// now get the corresponding java enum
 		jobject state = env->GetStaticObjectField(tensorFmtClass, tensorFmtField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
-		env->CallObjectMethod(info, setFmt, state);
+		env->CallVoidMethod(info, setFmt, state);
 		//
 		// tensor type enum conversion
 		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
@@ -326,7 +326,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		// now get the corresponding java enum
 		state = env->GetStaticObjectField(tensorTypeClass, tensorTypeField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
-		env->CallObjectMethod(info, setType, state);
+		env->CallVoidMethod(info, setType, state);
 		//
 		// tensor Qnt_type enum conversion
 		jclass tensorQntTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type");
@@ -353,13 +353,13 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1input_1a
 		// now call out mutator method to set the main target java instance with our newly created java enum
 		env->CallObjectMethod(info, setQnt_type, state);
 		// set the rest of the fields via mutator
-		env->CallObjectMethod(info, setZp, input_attr.zp);
-		env->CallObjectMethod(info, setScale, input_attr.scale);
-		env->CallObjectMethod(info, setFl, input_attr.fl);
-		env->CallObjectMethod(info, setW_stride, input_attr.w_stride);
-		env->CallObjectMethod(info, setSize_with_stride, input_attr.size_with_stride);
-		env->CallObjectMethod(info, setPass_through, input_attr.pass_through);
-		env->CallObjectMethod(info, setH_stride, input_attr.h_stride);
+		env->CallVoidMethod(info, setZp, input_attr.zp);
+		env->CallVoidMethod(info, setScale, input_attr.scale);
+		env->CallVoidMethod(info, setFl, input_attr.fl);
+		env->CallVoidMethod(info, setW_stride, input_attr.w_stride);
+		env->CallVoidMethod(info, setSize_with_stride, input_attr.size_with_stride);
+		env->CallVoidMethod(info, setPass_through, input_attr.pass_through);
+		env->CallVoidMethod(info, setH_stride, input_attr.h_stride);
 		//printf("jdk input attr tensor values set\n");
 	} else {
 	    printf("rknn_query_input_attr error ret=%d\n", ret);
@@ -411,15 +411,15 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 		jmethodID setSize_with_stride=env->GetMethodID(userDataClass, "setSize_with_stride", "(I)V");
 		jmethodID setPass_through=env->GetMethodID(userDataClass, "setPass_through", "(B)V");
 		jmethodID setH_stride=env->GetMethodID(userDataClass, "setH_stride", "(I)V");
-		env->CallObjectMethod(info, setN_dims, output_attr.n_dims);
-		env->CallObjectMethod(info, setDim, 0, output_attr.dims[0]);
-		env->CallObjectMethod(info, setDim, 1, output_attr.dims[1]);
-		env->CallObjectMethod(info, setDim, 2, output_attr.dims[2]);
-		env->CallObjectMethod(info, setDim, 3, output_attr.dims[3]);
-		env->CallObjectMethod(info, setN_elems, output_attr.n_elems);
+		env->CallVoidMethod(info, setN_dims, output_attr.n_dims);
+		env->CallVoidMethod(info, setDim, 0, output_attr.dims[0]);
+		env->CallVoidMethod(info, setDim, 1, output_attr.dims[1]);
+		env->CallVoidMethod(info, setDim, 2, output_attr.dims[2]);
+		env->CallVoidMethod(info, setDim, 3, output_attr.dims[3]);
+		env->CallVoidMethod(info, setN_elems, output_attr.n_elems);
 		jstrBuf = env->NewStringUTF(output_attr.name);
-		env->CallObjectMethod(info, setName, jstrBuf);
-		env->CallObjectMethod(info, setSize, output_attr.size);
+		env->CallVoidMethod(info, setName, jstrBuf);
+		env->CallVoidMethod(info, setSize, output_attr.size);
 		// tensor format enum conversion
 		jclass tensorFmtClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_format");
 		jfieldID tensorFmtField;
@@ -446,7 +446,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 		// now get the corresponding java enum
 		jobject state = env->GetStaticObjectField(tensorFmtClass, tensorFmtField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
-		env->CallObjectMethod(info, setFmt, state);
+		env->CallVoidMethod(info, setFmt, state);
 		//
 		// tensor type enum conversion
 		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
@@ -492,7 +492,7 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 		// now get the corresponding java enum
 		state = env->GetStaticObjectField(tensorTypeClass, tensorTypeField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
-		env->CallObjectMethod(info, setType, state);
+		env->CallVoidMethod(info, setType, state);
 		//
 		// tensor Qnt_type enum conversion
 		jclass tensorQntTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_qnt_type");
@@ -517,15 +517,15 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
 		// now get the corresponding java enum
 		state = env->GetStaticObjectField(tensorQntTypeClass, tensorQntTypeField);
 		// now call out mutator method to set the main target java instance with our newly created java enum
-		env->CallObjectMethod(info, setQnt_type, state);
+		env->CallVoidMethod(info, setQnt_type, state);
 		// set the rest of the fields via mutator
-		env->CallObjectMethod(info, setZp, output_attr.zp);
-		env->CallObjectMethod(info, setScale, output_attr.scale);
-		env->CallObjectMethod(info, setFl, output_attr.fl);
-		env->CallObjectMethod(info, setW_stride, output_attr.w_stride);
-		env->CallObjectMethod(info, setSize_with_stride, output_attr.size_with_stride);
-		env->CallObjectMethod(info, setPass_through, output_attr.pass_through);
-		env->CallObjectMethod(info, setH_stride, output_attr.h_stride);
+		env->CallVoidMethod(info, setZp, output_attr.zp);
+		env->CallVoidMethod(info, setScale, output_attr.scale);
+		env->CallVoidMethod(info, setFl, output_attr.fl);
+		env->CallVoidMethod(info, setW_stride, output_attr.w_stride);
+		env->CallVoidMethod(info, setSize_with_stride, output_attr.size_with_stride);
+		env->CallVoidMethod(info, setPass_through, output_attr.pass_through);
+		env->CallVoidMethod(info, setH_stride, output_attr.h_stride);
 		//printf("jdk output attr tensor values set\n");
 	} else {
 	    printf("rknn_query_output_attr error ret=%d\n", ret);
@@ -541,22 +541,28 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1query_1output_1
  */
 JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
   (JNIEnv* env, jobject thisObj, jlong ctx, jint ninputs, jobjectArray inputs) {
-	//int ret = rknn_inputs_set(ctx, io_num.n_input, inputs);
-	rknn_input npuinputs[ninputs];
-	memset(npuinputs, 0, sizeof(npuinputs));
-	for(int i = 0; i < ninputs; i++) {
-		//printf("Getting java array element %d\n",i);
+	rknn_input* npuinputs = (rknn_input*)calloc(ninputs, sizeof(rknn_input));
+
+	for (int i = 0; i < ninputs; i++) {
 		jobject input = env->GetObjectArrayElement(inputs, i);
-		jclass rknnInputClass=env->GetObjectClass(input);
-		// rknnInputClass should now be rknn_input
-		jmethodID getBuf=env->GetMethodID(rknnInputClass, "getBuf", "()[B");
-		jmethodID getType=env->GetMethodID(rknnInputClass, "getType", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
-		jmethodID getSize=env->GetMethodID(rknnInputClass, "getSize", "()I");
-		jmethodID getFmt=env->GetMethodID(rknnInputClass, "getFmt", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
-		jmethodID getPass_through=env->GetMethodID(rknnInputClass, "getPass_through", "()Z");
-		jbyteArray jbuf = (jbyteArray)env->CallObjectMethod(input, getBuf);
-		jbyte* b = env->GetByteArrayElements(jbuf, NULL);
-		npuinputs[i].buf = (void*)b;
+		jclass cls = env->GetObjectClass(input);
+		jmethodID midBuf = env->GetMethodID(cls, "getBuf", "()[B");
+		jbyteArray jbuf = (jbyteArray)env->CallObjectMethod(input, midBuf);
+		jsize len = env->GetArrayLength(jbuf);
+		jbyte* tmp = env->GetByteArrayElements(jbuf, NULL);
+		uint8_t* native_copy = (uint8_t*)malloc(len);
+		memcpy(native_copy, tmp, len);
+		env->ReleaseByteArrayElements(jbuf, tmp, JNI_ABORT);
+
+		npuinputs[i].buf  = native_copy;
+		npuinputs[i].size = len;
+		npuinputs[i].index = i;
+
+		//printf("Getting java array element %d\n",i);
+		jmethodID getType=env->GetMethodID(cls, "getType", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_type;");
+		jmethodID getSize=env->GetMethodID(cls, "getSize", "()I");
+		jmethodID getFmt=env->GetMethodID(cls, "getFmt", "()Lcom/neocoretechs/rknn4j/RKNN$rknn_tensor_format;");
+		jmethodID getPass_through=env->GetMethodID(cls, "getPass_through", "()Z");
 		// translate the enums via ordinal
 		jobject tensorType = env->CallObjectMethod(input, getType);
 		jclass tensorTypeClass = env->FindClass("com/neocoretechs/rknn4j/RKNN$rknn_tensor_type");
@@ -620,27 +626,21 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1inputs_1set
 			default:
 				return RKNN_ERR_FAIL;
 		}
-		npuinputs[i].size = env->CallIntMethod(input, getSize);
 		npuinputs[i].pass_through = env->CallBooleanMethod(input, getPass_through) ? 1 : 0;
-		env->ReleaseByteArrayElements(jbuf, b, 0);
-		npuinputs[i].index        = i;
 		//npuinputs[i].type         = RKNN_TENSOR_INT8;
 		//npuinputs[i].size         = 640 * 640 * 3;
 		//npuinputs[i].fmt          = RKNN_TENSOR_NHWC;
 		//npuinputs[i].pass_through = 0;
-
+		env->DeleteLocalRef(jbuf);
+		env->DeleteLocalRef(cls);
+		env->DeleteLocalRef(input);
 	}
-	handle = dlopen("/usr/lib/jni/librknnrt.so", RTLD_NOW);
-	if (!handle) {
-		  printf("dlerr=%s\n",dlerror());
-		  return RKNN_ERR_FAIL;
+	int ret = rknn_inputs_set((rknn_context)ctx, ninputs, npuinputs);
+	// free native copies after run completes
+	for (int i = 0; i < ninputs; i++) {
+		free(npuinputs[i].buf);
 	}
-	dlerror();
-	nn_inputs_set =(int (*)(rknn_context, uint32_t, rknn_input[])) dlsym(handle, "rknn_inputs_set");
-	dlerror();
-	//printf("Calling function pointer %p\n",nn_inputs_set);
-	ret = (*nn_inputs_set)((rknn_context)ctx, ninputs, npuinputs);
-	dlclose(handle);
+	free(npuinputs);
 	return ret;
 }
 
@@ -722,10 +722,10 @@ JNIEXPORT jint JNICALL Java_com_neocoretechs_rknn4j_rknpu2_rknn_1outputs_1get
 			jclass rknnOutputClass=env->GetObjectClass(output);
 			jmethodID setBuf=env->GetMethodID(rknnOutputClass, "setBuf", "([B)V");
 			jbyteArray jbuf = as_byte_array(env, (unsigned char*)npuoutputs[i].buf, npuoutputs[i].size);
-			env->CallObjectMethod(output, setBuf, jbuf);
+			env->CallVoidMethod(output, setBuf, jbuf);
 			//env->ReleaseByteArrayElements(jbuf, (jbyte*)npuoutputs[i].buf, 0);
 			jmethodID setSize=env->GetMethodID(rknnOutputClass, "setSize", "(I)V");
-			env->CallObjectMethod(output, setSize, npuoutputs[i].size);
+			env->CallVoidMethod(output, setSize, npuoutputs[i].size);
 		}
 	} else {
 		return ret;

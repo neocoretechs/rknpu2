@@ -22,14 +22,26 @@ set(LIB_ARCH aarch64)
 set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
 
 include_directories(${RKNN_API_PATH}/include)
-include_directories(/usr/share/java/jdk1.8.0_161/include)
-include_directories(/usr/share/java/jdk1.8.0_161/include/Linux)
+include_directories(/usr/share/java/graalvm-jdk-25+20.1/include)
+include_directories(/usr/share/java/graalvm-jdk-25+20.1/include/Linux)
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty)
 
 # opencv
 
 set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
   
+# Find JNI headers
+find_package(JNI REQUIRED)
+
+# Find the RKNN runtime library
+# Adjust the HINTS path if librknnrt.so lives elsewhere
+find_library(RKNNRT_LIB rknnrt
+    HINTS /usr/lib /usr/lib/aarch64-linux-gnu /usr/lib/jni)
+
+if(NOT RKNNRT_LIB)
+    message(FATAL_ERROR "Could not find librknnrt.so")
+endif()
+
 find_package(OpenCV REQUIRED)
 
 #rga
@@ -48,6 +60,7 @@ add_library(rknn4j SHARED
         src/postprocess.cc
 )
 
+target_include_directories(rknn4j PRIVATE ${JNI_INCLUDE_DIRS})
 set_target_properties(rknn4j PROPERTIES 
         VERSION ${PROJECT_VERSION}
         SOVERSION 1 
@@ -59,6 +72,7 @@ set_target_properties(rknn4j PROPERTIES
 #  ${OpenCV_LIBS}
 #)
 
+target_link_libraries(rknn4j PRIVATE ${RKNNRT_LIB})
 
 # install target and libraries
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn4j_${CMAKE_SYSTEM_NAME})
