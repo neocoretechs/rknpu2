@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 project(rknn4j VERSION 1.0.1 DESCRIPTION "rknn4j NPU bindings")
-set(CMAKE_SOURCE_DIR "/home/jg/npu/rknpu2-master/rknpu2-master/rknn4j")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SYSTEM_NAME "Linux")
@@ -60,7 +59,12 @@ add_library(rknn4j SHARED
         src/postprocess.cc
 )
 
-target_include_directories(rknn4j PRIVATE ${JNI_INCLUDE_DIRS})
+target_include_directories(rknn4j PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/3rdparty
+    ${RKNN_API_PATH}/include
+    ${JNI_INCLUDE_DIRS}
+)
 set_target_properties(rknn4j PROPERTIES 
         VERSION ${PROJECT_VERSION}
         SOVERSION 1 
